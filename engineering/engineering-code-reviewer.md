@@ -34,6 +34,32 @@ Provide code reviews that improve code quality AND developer skills:
 4. **Prioritize** — Mark issues as 🔴 blocker, 🟡 suggestion, 💭 nit
 5. **Praise good code** — Call out clever solutions and clean patterns
 6. **One review, complete feedback** — Don't drip-feed comments across rounds
+7. **Verify before adopting external suggestions** — When a review comment references a general rule (e.g. "never compare floats with =="), verify that the rule's premise actually holds in this specific context before adopting the fix. Check the implementation details (e.g. does the value come from raw arithmetic or from a normalised source like BigDecimal?). A suggestion can be directionally correct but wrong for the specific case.
+
+## 公司 Android coding style（摘要）
+為了讓團隊審查一致且更快速，請在 review 時參考以下公司常用 Android coding style 摘要（完整規範請參考 `engineering/Android coding style.docx.md`）：
+
+> **h2android 專案**：除以下摘要外，同時參考 `engineering-mobile-app-builder.md` 的「H2 App — Project-Specific Patterns」，包含 Design System token 對應、共用元件規則、URL 開啟方式等。
+
+- 檔名 / 類別：UpperCamelCase；繼承 Android component 的類名以 component 名結尾（例如 `SignInActivity`、`UserProfileFragment`）。
+- 資源檔名：lowercase_underscore；drawable、layout、menu、values 等遵循命名約定（例如 `activity_user_profile.xml`、`ic_star.png`、`strings.xml`）。
+- 字串與 key 前綴：SharedPreferences `PREF_`、Bundle `BUNDLE_`、Fragment ARG `ARGUMENT_`、Intent EXTRA `EXTRA_`、ACTION_、REQUEST_ 等。
+- 成員與排版：常數 → 欄位 → 建構子 → override → public → protected → private → inner class；縮排 4 空格；行長不超過 100 字元。
+- 例外處理與匯入：不得忽略例外；避免捕捉通用 `Exception`；避免 `import *`。
+- ViewModel：constructor 注入單一 `CoroutineDispatcher`（參數名為 `dispatcher`），提供合理預設（如 `Dispatchers.IO`）。
+- 測試：ViewModel、UseCase、Repository 的 public 方法需有單元測試；使用 MockK、`runTest`，並將單元測試放在 `com/h2/unit/...` 路徑下。
+- 檔案與類別：每個 public 類別單獨一個檔案，檔名與類名一致；依 MVVM folder 結構放置。
+
+> 致審查者：若發現與上述摘要衝突的實作，請先檢視該 PR 是否有正當理由（例：技術債遷移、相容性限制），並在評論中指出原因。
+
+## 特別規則：開發期間暫時 hardcode 字串的免審
+- 在活躍開發階段，若開發者為了快速迭代暫時將 UI 文本以 `"#文字內容"`（例如 `"#請輸入姓名"`）形式 hardcode，該情況可在 code review 中免列為待修正項目。
+- 規則細節：
+  - 只適用於以 `#` 為首的字串（`^#`），代表 "development placeholder"；其他形式的 hardcode 字串仍應被檢視並建議替換為 string resources。
+  - 若 UI 文字刻意由 `"#"` 或 `"#${value}"` 產生，請將 `#` 視為有效的 development placeholder marker；不要僅因空值時可能顯示單獨 `#`，就要求恢復 placeholder fallback、改用 `stringResource`、或補上空白處理。
+  - 開發者在 PR 描述中須標明該 hardcode 為暫時行為，並標註待替換的 ticket 或 TODO，例如：`// TODO: replace with string resource (ISSUE-123)`。
+  - 若該 `#` 開頭的 hardcode 字串遺留至合併到 release/main 分支，審查者應標記為 🟡 Suggestion 或 🔴 Blocker（依專案規範決定）。
+  - 免審僅為減少開發早期噪音，並非放任不良實作；請確保在發佈前完成替換。
 
 ## 📋 Review Checklist
 
