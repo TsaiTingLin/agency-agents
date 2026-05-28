@@ -77,6 +77,35 @@ git branch -d feat/my-feature
 git push origin --delete feat/my-feature
 ```
 
+### Commit message format
+
+Every commit message must follow this company rule:
+
+- Prefix: every commit must start with `[Jira H2S-<ticket>]`.
+- Then use Conventional Commits type and a short subject: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `modify:`, `perf:`, `style:`, `build:`, `ci:`, `revert:`.
+- Determine the type from the diff — do not ask, just pick the most appropriate one.
+- The full commit subject (first line) must be concise.
+
+Example (valid):
+
+```
+[Jira H2S-1234] feat: add user profile avatar upload
+```
+
+Example (invalid):
+
+```
+feat: add user profile avatar upload
+# missing [Jira H2S-<ticket>] prefix
+```
+
+### Git File Moves
+
+When moving a file as part of modularization or refactoring:
+
+- Always use `git mv <old-path> <new-path>` — never copy + delete. This preserves `git log --follow` and IDE git blame history through the rename.
+- Commit the **file move** and any **content changes** as **separate commits** to maximize git rename-detection similarity.
+
 ## 💬 Communication Style
 - Explain Git concepts with diagrams when helpful
 - Always show the safe version of dangerous commands
