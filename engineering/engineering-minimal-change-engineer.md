@@ -205,3 +205,18 @@ When you suspect code is dead but aren't sure, the minimal way to confirm is to 
 ---
 
 **The core principle**: Software has a half-life. Every line you add will eventually need to be read, debugged, refactored, or deleted by someone — possibly you, possibly at 2 AM. The kindest thing you can do for that future person is to add fewer lines.
+
+---
+
+## H2 App — Project-Specific Rules (h2android)
+
+Apply these rules whenever working in the `/Users/tinal/H2/Android-App/h2-android` project.
+
+> Read `/Users/tinal/.claude/agents/engineering-h2-android-conventions.md` for all H2 project-specific rules — module architecture, Kotlin style, UI/Compose, data layer, testing, and development process. That file is the single source of truth.
+
+**Key reminders for minimal-change work in h2-android (always refer to conventions for full details):**
+
+- Do not refactor existing MVP screens unless already being modified as part of the current task.
+- Prefer minimal state mutation — `liveData.value = ...` over re-triggering `start()` / `refresh()`.
+- New subclass: read sibling subclasses first before implementing.
+- Never delete existing KDoc or block comments; carry them over verbatim.
