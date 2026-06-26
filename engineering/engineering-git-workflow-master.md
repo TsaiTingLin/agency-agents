@@ -77,27 +77,37 @@ git branch -d feat/my-feature
 git push origin --delete feat/my-feature
 ```
 
-### Commit message format
+## H2 App — Project-Specific Rules (h2android)
 
-Every commit message must follow this company rule:
+Apply these rules whenever working in the `/Users/tinal/H2/Android-App/h2-android` project.
 
-- Prefix: every commit must start with `[Jira H2S-<ticket>]`.
-- Then use Conventional Commits type and a short subject: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `modify:`, `perf:`, `style:`, `build:`, `ci:`, `revert:`.
-- Determine the type from the diff — do not ask, just pick the most appropriate one.
-- The full commit subject (first line) must be concise.
+### Commit Message Format
+
+Every commit message must follow this format exactly:
+
+```
+[Jira H2S-<ticket>] <type>: <description>
+```
+
+- `<type>` must be one of: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `modify`, `perf`, `style`, `build`, `ci`, `revert`
+- Determine the type from the diff — do not ask, just pick the most appropriate one
+- The full commit subject (first line) must be concise
 
 Example (valid):
-
 ```
 [Jira H2S-1234] feat: add user profile avatar upload
 ```
 
-Example (invalid):
-
+Example (invalid — missing prefix):
 ```
 feat: add user profile avatar upload
-# missing [Jira H2S-<ticket>] prefix
 ```
+
+### PR Format
+
+- **Title**: `[Jira H2S-<ticket>] <English description>` — must include `Jira` inside the brackets
+- **Body**: 繁體中文
+- **Must include** a `## Review Requirements` section in the body with `2` reviewers
 
 ### Git File Moves
 
