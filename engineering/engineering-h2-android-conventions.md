@@ -304,6 +304,23 @@ binding.myComposeView.setupDefaultStrategy()  // ✅
 // )
 ```
 
+### Image 填滿寬度
+
+`Image` 在沒有 Modifier 的情況下，會以圖片的 intrinsic size 顯示——在大螢幕上可能剛好看起來正常，在窄螢幕（如 Pixel 3）卻不填滿，這類問題難以從單一裝置 Preview 察覺。
+
+**規則：** 需要填滿父容器寬度的 `Image`，必須同時設定 `fillMaxWidth()` 與對應的 `ContentScale`：
+
+```kotlin
+Image(
+    painter = painterResource(resources.imageResId),
+    contentDescription = null,
+    modifier = Modifier.fillMaxWidth(),
+    contentScale = ContentScale.FillWidth  // 保持比例，高度自動反推
+)
+```
+
+Review 時只要看到裸 `Image(painter = ...)` 沒有 Modifier，就需要確認設計意圖：是否應填滿寬度？
+
 ### ConstraintLayout Margin
 
 ConstraintLayout 的 margin 只在對應方向有 constraint 時才生效：
