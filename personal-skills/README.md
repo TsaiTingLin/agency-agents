@@ -19,13 +19,13 @@ be installed into multiple AI tools.
 | OpenSpec | Spec-driven development CLI — used by `opsx:*` skills | See [docs](https://kaochenlong.com/openspec) |
 | Superpowers | Skill framework for Claude Code — used by brainstorming, review, and planning skills | See [docs](https://kaochenlong.com/ai-superpowers-skills) |
 
-**MCP connections** — configure in Claude Code before using related skills:
+**MCP connections** — only needed for the skills that use them. Enable at [claude.ai → Settings → Connectors](https://claude.ai/new#settings/customize-connectors):
 
-| MCP | Used by |
-|---|---|
-| Atlassian / Jira | `jira-ticket`, `new-jira-ticket`, `pr-review`, `write-pr`, `quality-gate` |
-| Figma | `jira-ticket` (when ticket contains Figma links) |
-| Jenkins | `jenkins-build` |
+| MCP | Used by | Setup |
+|---|---|---|
+| Atlassian / Jira | `jira-ticket`, `new-jira-ticket`, `pr-review`, `write-pr`, `quality-gate` | [Enable in Connectors](https://claude.ai/new#settings/customize-connectors) |
+| Figma | `jira-ticket` (when ticket contains Figma links) | [Enable in Connectors](https://claude.ai/new#settings/customize-connectors) |
+| Jenkins | `jenkins-build` | Custom MCP — server lives in `personal-skills/tools/jenkins-monitor/`. Auto-configured by `sync-skills.sh`. Requires `JENKINS_URL`, `JENKINS_USER`, `JENKINS_TOKEN` in `~/.zshrc`. |
 
 ### Setup
 
