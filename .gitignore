@@ -81,3 +81,9 @@ integrations/kimi/*/
 !integrations/kimi/README.md
 integrations/codex/agents/*
 integrations/osaurus/agency-*/
+
+# Superpowers SDD progress ledger (session scratch, not committed)
+.superpowers/
+
+# Personal skills local configuration (user-specific, not committed)
+personal-skills/config/local.env

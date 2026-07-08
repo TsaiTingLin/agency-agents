@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(cat ~/.zshrc*)",
+      "Bash(cat ~/.env*)",
+      "Bash(grep * ~/.zshrc*)",
+      "Bash(grep * ~/.env*)",
+      "Read({{HOME}}/.zshrc*)",
+      "Read({{HOME}}/.env*)",
+      "Read({{HOME}}/.bash*)"
+    ],
+    "allow": [
+      "Bash(gh *)"
+    ]
+  },
+  "theme": "dark",
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{
+        "type": "command",
+        "command": "python3 {{HOME}}/.claude/tools/mentor_memory.py init 2>/dev/null || true"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "python3 {{HOME}}/.claude/tools/mentor_retrospective.py"
+      }]
+    }]
+  }
+}

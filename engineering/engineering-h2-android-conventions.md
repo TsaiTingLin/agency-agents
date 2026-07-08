@@ -8,7 +8,7 @@ vibe: One place for every H2 convention — update here, works everywhere.
 
 # H2 Android Conventions
 
-Apply these rules whenever working in the `/Users/tinal/H2/Android-App/h2-android` project.
+Apply these rules whenever working in the `{{PROJECT_REPO}}` project.
 
 ---
 

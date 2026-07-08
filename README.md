@@ -83,6 +83,21 @@ Browse the agents below and copy/adapt the ones you need!
 
 See the [Multi-Tool Integrations](#-multi-tool-integrations) section below for full details.
 
+### Option 4: Sync Personal Workflow Commands
+
+This fork can also keep personal workflow commands in the repo and sync them to
+Claude Code commands or Codex skills:
+
+```bash
+./scripts/sync-skills.sh --to claude --dry-run
+./scripts/sync-skills.sh --to codex --dry-run
+./scripts/sync-skills.sh --to all --replace
+```
+
+Source files live in `personal-skills/commands/`. See
+[`personal-skills/README.md`](personal-skills/README.md) for dependency notes,
+including OpenSpec, Superpowers, and MCP requirements.
+
 ---
 
 ## 🎨 The Agency Roster

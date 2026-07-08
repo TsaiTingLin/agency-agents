@@ -496,7 +496,7 @@ You're successful when:
 
 ## H2 App — Project-Specific Rules (h2android)
 
-Apply these rules whenever working in the `/Users/tinal/H2/Android-App/h2-android` project.
+Apply these rules whenever working in the `{{PROJECT_REPO}}` project.
 
-> Read `/Users/tinal/.claude/agents/engineering-h2-android-conventions.md` for all H2 project-specific rules — module architecture, Kotlin style, UI/Compose, data layer, testing, and development process. That file is the single source of truth.
+> Read `{{HOME}}/.claude/agents/{{PROJECT_CONVENTIONS_AGENT}}` for all H2 project-specific rules — module architecture, Kotlin style, UI/Compose, data layer, testing, and development process. That file is the single source of truth.
 

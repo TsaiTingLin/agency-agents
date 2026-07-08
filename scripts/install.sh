@@ -4,8 +4,9 @@
 # install.sh -- Install The Agency agents into your local agentic tool(s).
 #
 # Reads converted files from integrations/ and copies them to the appropriate
-# config directory for each tool. Run scripts/convert.sh first if integrations/
-# is missing or stale.
+# config directory for each tool. Converted integrations are generated
+# automatically when missing. Codex integrations are regenerated before install
+# unless --no-convert is used.
 #
 # Usage:
 #   ./scripts/install.sh [selection] [mode] [behavior]
@@ -39,7 +40,7 @@
 # Behavior:
 #   --interactive         Show the interactive wizard (default when run in a terminal)
 #   --no-interactive      Skip the wizard, install all detected tools
-#   --no-convert          Don't auto-run convert.sh when integration files are missing
+#   --no-convert          Don't auto-run convert.sh before install
 #   --dry-run             Print the plan and exit without writing anything
 #   --list [tools|teams|agents]   List and exit
 #   --parallel            Install tools in parallel (output buffered per tool)
@@ -122,6 +123,10 @@ box_blank() { printf "  |%*s|\n" $BOX_INNER ''; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INTEGRATIONS="$REPO_ROOT/integrations"
+
+# Load machine-local variables (gitignored, never committed)
+[[ -f "$REPO_ROOT/personal-skills/config/local.env" ]] \
+  && source "$REPO_ROOT/personal-skills/config/local.env"
 
 # Shared helpers (get_field, agent_slug, slugify, incr, ANSI + TUI primitives)
 # shellcheck source=lib.sh
@@ -243,9 +248,22 @@ validate_division() {
 USE_LINK=false        # --link
 OVERRIDE_PATH=""      # --path (single-destination override)
 
-# install_file <src> <dest> — copy, or symlink when --link is set.
+# install_file <src> <dest> — copy with placeholder substitution, or symlink when --link is set.
+# Dest may be a directory path (with trailing slash); resolved to file path automatically.
 install_file() {
-  if $USE_LINK; then ln -sf "$1" "$2"; else cp "$1" "$2"; fi
+  local src="$1" dest="$2"
+  if $USE_LINK; then
+    ln -sf "$src" "$dest"
+  else
+    # Resolve directory destinations to a full file path
+    if [[ -d "$dest" || "$dest" == */ ]]; then
+      dest="${dest%/}/$(basename "$src")"
+    fi
+    sed -e "s|{{HOME}}|$HOME|g" \
+        -e "s|{{PROJECT_REPO}}|${PROJECT_REPO:-{{PROJECT_REPO}}}|g" \
+        -e "s|{{PROJECT_CONVENTIONS_AGENT}}|${PROJECT_CONVENTIONS_AGENT:-{{PROJECT_CONVENTIONS_AGENT}}}|g" \
+        "$src" > "$dest"
+  fi
 }
 
 # resolve_dest <tool> <default> — --path > $ENV_VAR > default.
@@ -280,11 +298,11 @@ resolve_tool_path() {
 }
 
 # ensure_converted <tool> — auto-run convert.sh if a converted tool's output
-# is missing (absorbs #426). No-op for source tools and when --no-convert.
+# is missing (absorbs #426). No-op for source tools, Codex, and --no-convert.
 ensure_converted() {
   local tool="$1"
   $AUTO_CONVERT || return 0
-  case "$tool" in claude-code|copilot) return 0 ;; esac
+  case "$tool" in claude-code|copilot|codex) return 0 ;; esac
   local d="$INTEGRATIONS/$tool"
   if [[ ! -d "$d" ]] || [[ -z "$(find "$d" -type f 2>/dev/null | head -1)" ]]; then
     warn "$tool: integration files missing — running convert.sh --tool $tool"
@@ -914,7 +932,12 @@ install_codex() {
   local src="$INTEGRATIONS/codex/agents"
   local dest; dest="$(resolve_dest codex "${HOME}/.codex/agents")"
   local count=0
-  [[ -d "$src" ]] || { err "integrations/codex missing. Run convert.sh first."; return 1; }
+  if $AUTO_CONVERT; then
+    "$SCRIPT_DIR/convert.sh" --tool codex >/dev/null 2>&1 \
+      && ok "Codex: regenerated integration files" \
+      || { err "Codex: convert.sh failed; run it manually"; return 1; }
+  fi
+  [[ -d "$src" ]] || { err "integrations/codex missing. Re-run install without --no-convert, or run convert.sh manually."; return 1; }
   mkdir -p "$dest"
   local f
   while IFS= read -r -d '' f; do
@@ -1120,7 +1143,8 @@ main() {
   box_row "${C_GREEN}${C_BOLD}${msg}${C_RESET}"
   box_bot
   printf "\n"
-  dim "  Run ./scripts/convert.sh to regenerate after adding or editing agents."
+  dim "  Tip: install auto-generates missing integrations; Codex is regenerated before install."
+  dim "       Run ./scripts/convert.sh only when you need integration artifacts without installing."
   printf "\n"
 }
 

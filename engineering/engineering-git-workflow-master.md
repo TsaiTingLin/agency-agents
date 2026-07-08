@@ -79,7 +79,7 @@ git push origin --delete feat/my-feature
 
 ## H2 App — Project-Specific Rules (h2android)
 
-Apply these rules whenever working in the `/Users/tinal/H2/Android-App/h2-android` project.
+Apply these rules whenever working in the `{{PROJECT_REPO}}` project.
 
 ### Commit Message Format
 
