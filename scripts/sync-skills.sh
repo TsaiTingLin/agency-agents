@@ -434,11 +434,11 @@ write_codex_skill() {
   local src="$1" rel slug skill_dir skill_file title desc body
   rel="$(command_relpath "$src")"
   slug="$(command_slug "$rel")"
-  skill_dir="$CODEX_DEST/claude-command-$slug"
+  skill_dir="$CODEX_DEST/$slug"
   skill_file="$skill_dir/SKILL.md"
 
   if [[ -e "$skill_dir" || -L "$skill_dir" ]]; then
-    replace_path "$skill_dir" || { printf '  skip    codex claude-command-%s (exists)\n' "$slug"; return 0; }
+    replace_path "$skill_dir" || { printf '  skip    codex %s (exists)\n' "$slug"; return 0; }
   fi
 
   title="$(get_field name "$src")"
@@ -455,7 +455,7 @@ write_codex_skill() {
   mkdir -p "$skill_dir"
   {
     printf '%s\n' '---'
-    printf 'name: %s\n' "claude-command-$slug"
+    printf 'name: %s\n' "$slug"
     printf 'description: "%s"\n' "$(toml_escape_like_yaml_string "$desc")"
     printf '%s\n' '---'
     printf '\n'
