@@ -171,13 +171,9 @@ C) 直接在目前分支作業
 
 ## Step 6 — 實作
 
-依照 tasks.md 逐一完成。每完成一個 task：
-- 若實作方式與 tasks.md / spec 描述有出入（例如 signature 改變、新增依賴），**立即更新對應 openspec 文件**，反映最終實作
+執行 `/opsx:apply` 實作 tasks.md 中的 tasks。
 
-過程中若有疑問：
-```bash
-python3 ~/.claude/tools/mentor_memory.py log-issue '問題描述' '發生原因' '解法'
-```
+每完成一個 task，若實作方式與 tasks.md / spec 描述有出入（例如 signature 改變、新增依賴），**立即更新對應 openspec 文件**，反映最終實作。
 
 **多階段注意**：只實作**當前 Phase** 的 tasks，不得跨 phase 實作。
 

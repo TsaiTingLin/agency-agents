@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Mentor memory management — stores working memory for mentor checks.
 
-Each terminal session gets an isolated directory under ~/.claude/review/<session-id>/.
+Each terminal session gets an isolated directory under <tool-dir>/review/<session-id>/.
+The review base is derived from the script's own location — ~/.claude/tools → ~/.claude/review,
+~/.codex/tools → ~/.codex/review — so each AI tool has fully isolated session storage.
 Session ID priority: TERM_SESSION_ID (macOS Terminal) → ITERM_SESSION_ID (iTerm2) → CLAUDE_CODE_SESSION_ID (fallback).
 TERM_SESSION_ID is used as primary because it's available in both hook env and terminal shell (EXIT trap).
 
@@ -33,7 +35,9 @@ def _term_session_id() -> str | None:
 
 
 def _review_base() -> Path:
-    return Path.home() / ".claude" / "review"
+    # ~/.claude/tools/mentor_memory.py → ~/.claude/review/
+    # ~/.codex/tools/mentor_memory.py  → ~/.codex/review/
+    return Path(__file__).parent.parent / "review"
 
 
 def get_session_dir() -> Path | None:
