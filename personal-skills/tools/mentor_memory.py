@@ -4,7 +4,7 @@
 Each terminal session gets an isolated directory under <tool-dir>/review/<session-id>/.
 The review base is derived from the script's own location — ~/.claude/tools → ~/.claude/review,
 ~/.codex/tools → ~/.codex/review — so each AI tool has fully isolated session storage.
-Session ID priority: TERM_SESSION_ID (macOS Terminal) → ITERM_SESSION_ID (iTerm2) → CLAUDE_CODE_SESSION_ID (fallback).
+Session ID priority: TERM_SESSION_ID (macOS Terminal) → ITERM_SESSION_ID (iTerm2) → CLAUDE_CODE_SESSION_ID → CODEX_THREAD_ID (Codex Desktop).
 TERM_SESSION_ID is used as primary because it's available in both hook env and terminal shell (EXIT trap).
 
 On terminal close, the .zshrc EXIT trap deletes the directory directly.
@@ -31,7 +31,8 @@ from pathlib import Path
 def _term_session_id() -> str | None:
     return (os.environ.get("TERM_SESSION_ID")
             or os.environ.get("ITERM_SESSION_ID")
-            or os.environ.get("CLAUDE_CODE_SESSION_ID"))
+            or os.environ.get("CLAUDE_CODE_SESSION_ID")
+            or os.environ.get("CODEX_THREAD_ID"))
 
 
 def _review_base() -> Path:
@@ -51,7 +52,7 @@ def get_session_dir() -> Path | None:
 def init_session() -> Path:
     sid = _term_session_id()
     if not sid:
-        raise RuntimeError("$TERM_SESSION_ID is not set — cannot initialise session")
+        raise RuntimeError("No session ID found (TERM_SESSION_ID / ITERM_SESSION_ID / CLAUDE_CODE_SESSION_ID / CODEX_THREAD_ID)")
     session_dir = _review_base() / sid
     session_dir.mkdir(parents=True, exist_ok=True)
     _cleanup_old_sessions()
