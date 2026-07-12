@@ -5,7 +5,7 @@ argument-hint: "[需求描述（可選）]"
 
 # New Feature
 
-從需求到 commit 的完整流程：收集材料 → brainstorm → 實作計畫 → 找相關 code → 實作 → review → commit。
+從需求到 commit 的完整流程：收集材料 → brainstorm → 找相關 code → OpenSpec change → 實作 → review → commit。
 
 > ⚠️ **每個 Step 必須依序完成，不得跳過**
 
@@ -77,40 +77,7 @@ argument-hint: "[需求描述（可選）]"
 
 ---
 
-## Step 3 — 實作計畫
-
-**3.1 — 規模評估**
-
-根據 spec 評估並請使用者確認：
-
-```
-建議：[單一功能 / 多階段]
-原因：[2-3 句說明]
-
-這樣的範圍符合你的期望嗎？
-```
-
-**3.2 — 產出實作計畫**
-
-使用 `superpowers:writing-plans`，以 spec 為輸入，產出 implementation plan。
-
-Plan 路徑：`docs/superpowers/plans/YYYY-MM-DD-<topic>-plan.md`
-
-**覆蓋規則：writing-plans 產出 plan 後，不執行 subagent-driven-development 或 executing-plans，控制權回本 skill。**
-
-**3.3 — Plan Gate**
-
-```
-/quality-gate mentor-check-plan none <plan-path>
-```
-
-若 BLOCK → 修正 plan 後重跑；PASS / WARN → 展示 plan 給使用者確認。
-
-⛔ **等使用者明確確認 plan 後，才進入 Step 4。**
-
----
-
-## Step 4 — 找相關 code
+## Step 3 — 找相關 code
 
 用 Grep、Glob、Read 找到與功能相關的檔案與 code path：
 
@@ -119,6 +86,62 @@ Plan 路徑：`docs/superpowers/plans/YYYY-MM-DD-<topic>-plan.md`
 - **新增任何 class、method、storage 前，先確認 codebase 是否已有可擴充的現有實作**，只有在確認現有實作不足後才提新結構
 
 若需求類型是 **Bug**，先執行 `superpowers:systematic-debugging` 完成根因確認，再繼續。
+
+---
+
+## Step 4 — 建立 OpenSpec change ⛔ 強制閘門
+
+**禁止跳過。禁止在此步驟完成前修改任何原始碼（包括 Edit / Write / Bash 寫檔）。**
+
+First, check whether a change already exists:
+
+```bash
+ls openspec/changes/ | grep "<topic>"
+```
+
+- **If matches found**: show the list and ask the user which to reuse, or create a new one. If reusing, skip `/opsx:propose` and proceed with the chosen directory's `tasks.md`.
+- **If none found**: proceed below.
+
+Before calling `/opsx:propose`, read agent files (already loaded in Step 0). If `{{PROJECT_CONVENTIONS_AGENT}}` is set, pay special attention to its class design and module placement rules when writing the proposal.
+
+Invoke `/opsx:propose` to generate the spec files.
+
+- Change name format: `YYYY-MM-DD-<topic>` (e.g. `2026-01-15-add-glucose-trend`)
+- If Step 2 produced a brainstorm spec, reference it as the primary context in the proposal
+- The proposal, design, and tasks.md will be created under `openspec/changes/<name>/`
+
+⛔ **tasks.md 產出後，立即執行 mentor-check-plan，禁止先展示給使用者：**
+
+```bash
+python3 ~/.claude/tools/mentor_memory.py init
+```
+
+Then invoke `/quality-gate mentor-check-plan none <tasks-md-path>`
+- 若 Step 2 找到 brainstorm spec，在 Mentor prompt 加上 `Brainstorm spec 路徑：<spec-path>`
+
+- **PASS / WARN** → 繼續，展示 tasks.md 給使用者確認
+- **BLOCK** → 修正 task list 後重跑，不得跳過
+
+⛔ **STOP：在使用者明確確認 tasks.md 後才能繼續 Step 4.3。**
+
+---
+
+## Step 4.3 — PR Phase Planning
+
+根據確認後的 tasks.md，判斷是否需要分 phase 發 PR。
+
+| 條件 | 建議 |
+|---|---|
+| tasks ≤ 3 個 | 單一 phase |
+| tasks ≥ 4 個但都在同一個 layer | 單一 phase |
+| tasks 跨越 data / domain / UI 層 | 分 phase |
+| 有明確依賴順序 | 依依賴分 phase |
+
+**預設 2-phase 切法（跨 layer 時）：**
+- Phase 1：data + domain layer
+- Phase 2：UI layer
+
+提出建議並詢問使用者確認後才進入 Step 5。
 
 ---
 
@@ -139,7 +162,7 @@ C) 直接在目前分支作業
 
 等使用者確認後執行對應的 `git checkout`。
 
-**多階段（若 Step 3.1 確認多階段）：**
+**多階段（若 Step 4.3 確認多階段）：**
 - Phase 1 從 base branch 開
 - Phase N 從 Phase N-1 branch 開
 - 此步驟只建立**當前 Phase** 的 branch
@@ -148,8 +171,8 @@ C) 直接在目前分支作業
 
 ## Step 6 — 實作
 
-依照 plan 的 tasks 逐一完成。每完成一個 task：
-- 若實作方式與 plan 描述有出入（例如 signature 改變、新增依賴），**立即更新 plan**，反映最終實作
+依照 tasks.md 逐一完成。每完成一個 task：
+- 若實作方式與 tasks.md / spec 描述有出入（例如 signature 改變、新增依賴），**立即更新對應 openspec 文件**，反映最終實作
 
 過程中若有疑問：
 ```bash
@@ -176,9 +199,9 @@ python3 ~/.claude/tools/mentor_memory.py log-issue '問題描述' '發生原因'
 
 ## Step 7 — Review 與 Commit
 
-執行 `/pre-commit-review <plan-path>`，完整跑完其所有步驟（review → fix → test → mentor-check-commit → commit）。
+執行 `/pre-commit-review <tasks-md-path>`，完整跑完其所有步驟（review → fix → test → mentor-check-commit → commit）。
 
-`<plan-path>` 為 Step 3.2 產出的 plan 檔路徑，傳入後 mentor-check-commit 會用它做計畫覆蓋驗證。
+`<tasks-md-path>` 為 Step 4 產出的 tasks.md 路徑，傳入後 mentor-check-commit 會用它做計畫覆蓋驗證。
 
 ---
 
