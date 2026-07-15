@@ -100,7 +100,7 @@ Agent files in `~/.claude/agents/` are managed by the `~/agency-agents` reposito
 
 ## Project-specific Rules
 
-<!-- Add per-project rules below. Example pattern (from the h2 branch):
+<!-- Add per-project rules below. Example:
 
 ### MyProject (`{{PROJECT_REPO}}`)
 
