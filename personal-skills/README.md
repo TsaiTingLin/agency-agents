@@ -1,7 +1,6 @@
 # Personal Skills
 
-This directory is the source of truth for personal workflow commands that should
-be installed into multiple AI tools.
+Ship faster without the busywork. Built on [agency-agents](../README.md), Personal Skills automates your full development cycle — Jira ticket → implementation → code review → commit → PR → CI → release notes — all triggered by natural language in Claude Code and Codex.
 
 ---
 
@@ -45,32 +44,36 @@ cp personal-skills/config/local.env.example personal-skills/config/local.env
 # 4. Preview what sync will do (dry run)
 ./scripts/sync-skills.sh --to claude --dry-run   # Claude Code
 ./scripts/sync-skills.sh --to codex --dry-run    # Codex
-
-# 5. Sync skills, tools, and config
-./scripts/sync-skills.sh --to claude --replace   # Claude Code
-./scripts/sync-skills.sh --to codex --replace    # Codex
-```
-
-After sync completes, add the following to `~/.zshrc` if not already present:
-
-```bash
-# Claude Code session cleanup
-trap '[[ -n "$TERM_SESSION_ID" ]] && rm -rf "$HOME/.claude/review/$TERM_SESSION_ID" 2>/dev/null' EXIT
-```
-
-If you use the `/jenkins-build` skill, also add Jenkins credentials:
-
-```bash
-# Jenkins MCP credentials (only needed for /jenkins-build)
-export JENKINS_URL="https://your-jenkins.com"
-export JENKINS_USER="your-username"
-export JENKINS_TOKEN="your-token"
 ```
 
 The dry-run output has three sections:
 - `[OK]` / `[!!]` — preflight: checks tools, MCP connections, and env vars. `[!!]` items are warnings for optional runtime dependencies not yet configured — install still succeeds. Only configure what the skills you actually use require; ignore `[!!]` for skills you don't use.
 - `copy ...` — skills and tools that will be installed
 - `dry-run ...` — config files (`CLAUDE.md`, `settings.json`) that will be merged
+
+```bash
+# 5. Sync skills, tools, and config
+./scripts/sync-skills.sh --to claude --replace   # Claude Code
+./scripts/sync-skills.sh --to codex --replace    # Codex
+```
+
+### 6. Add to `~/.zshrc`
+
+Add the following to `~/.zshrc`:
+
+```bash
+# Claude Code session cleanup
+trap '[[ -n "$TERM_SESSION_ID" ]] && rm -rf "$HOME/.claude/review/$TERM_SESSION_ID" 2>/dev/null' EXIT
+
+# Jenkins MCP credentials (only needed for /jenkins-build)
+export JENKINS_URL="https://your-jenkins.com"
+export JENKINS_USER="your-username"
+export JENKINS_TOKEN="your-token"
+```
+
+Then run `source ~/.zshrc` to apply, or just open a new terminal.
+
+That's it — you're all set. Have fun! 🚀
 
 ---
 
@@ -99,15 +102,6 @@ agency-agents/
                           Codex:       ~/.codex/tools/
 ```
 
-### Branch Strategy
-
-| Branch | Purpose |
-|---|---|
-| `main` | Generic — works for any project. `local.env.example` contains commented-out examples only. Clone this to start fresh. |
-| project branches | Pre-configured for a specific project — `local.env.example` has values pre-filled and `config/CLAUDE.md` includes project-specific rules. Not pushed to remote (may contain private config). |
-
-Clone `main` and fill in `local.env` to set up for your project. Project-specific branches exist only locally.
-
 ### Variables
 
 Skills and agents use placeholders that are substituted at install/sync time. This keeps the repo files project-agnostic — no hardcoded absolute paths — so the same files work across machines and projects just by setting `local.env`.
@@ -116,7 +110,7 @@ Skills and agents use placeholders that are substituted at install/sync time. Th
 |---|---|---|---|
 | `{{HOME}}` | `$HOME` (shell) | skills, agents | User home directory — no config needed |
 | `{{PROJECT_REPO}}` | `local.env` → `PROJECT_REPO` | skills, CLAUDE.md | Absolute path to your primary project repo |
-| `{{PROJECT_CONVENTIONS_AGENT}}` | `local.env` → `PROJECT_CONVENTIONS_AGENT` | skills | Filename of the project conventions agent (must exist in `~/.claude/agents/`) |
+| `{{PROJECT_CONVENTIONS_AGENT}}` | `local.env` → `PROJECT_CONVENTIONS_AGENT` | skills | Filename of the project conventions agent (must exist in `~/.claude/agents/`). Defaults to `engineering-project-example-conventions.md` — rename and edit it for your project. |
 | `{{JIRA_PROJECT_KEY}}` | `local.env` → `JIRA_PROJECT_KEY` | Jira skills | Jira project key (e.g. `PROJ`) — the prefix before the ticket number, used in JQL queries |
 | `{{JIRA_BASE_URL}}` | `local.env` → `JIRA_BASE_URL` | Jira skills | Jira instance URL (e.g. `https://yourcompany.atlassian.net`) |
 | `{{JIRA_ASSIGNEE_EMAIL}}` | `local.env` → `JIRA_ASSIGNEE_EMAIL` | Jira skills | Email used for Jira assignee lookup |
@@ -134,37 +128,45 @@ Source files live in `agency-agents/engineering/`, `agency-agents/specialized/`,
 
 Skills that need specialized behavior read the relevant agent file at runtime — for example, `/pre-commit-review` reads `engineering-code-reviewer.md` and `engineering-git-workflow-master.md` at Step 1 before doing anything.
 
+The following agents are specific to this skill workflow:
+
+| Agent | Location | Description | Used by |
+|---|---|---|---|
+| Quality Gate Mentor | `engineering/engineering-quality-gate-mentor.md` | Adversarial quality gate for skill execution — default stance is BLOCK; PASS requires evidence. | `/quality-gate` |
+| Project Conventions Agent | `{{PROJECT_CONVENTIONS_AGENT}}` (set in `local.env`) | Project-specific coding conventions. Loaded automatically for project-related tasks. Start from `engineering-project-example-conventions.md` and customise for your project. | `/jira-ticket`, `/new-feature`, `/pre-commit-review` |
+
 ### Skills
 
 Skills install to `~/.claude/commands/` (Claude Code) or `~/.codex/skills/` (Codex). Invoke with `/skill-name`.
 
 The skills below are on `main`. Project-specific branches may add additional skills not listed here.
 
+You don't need to type the slash command directly — just describe what you want in natural language and Claude will trigger the right skill automatically. Claude decides based on the `Use when` clause in each skill's `description` frontmatter. If a phrase doesn't work, add it to the `Use when` clause in `personal-skills/commands/<skill>.md`.
+
 **Feature development**
 
-| Skill | Description |
-|---|---|
-| `/new-feature` | Full flow from requirement to commit — brainstorm, plan, implement, review, commit. No Jira required. |
-| `/new-jira-ticket` | Full flow from requirement to Jira ticket — brainstorm, create ticket, optionally kick off implementation. Requires Jira env vars. |
-| `/jira-ticket` | Read Jira ticket, implement via OpenSpec, then commit. Requires Jira env vars and OpenSpec. |
-| `/pre-commit-review` | Review staged changes, auto-fix issues, run tests, mentor-check-commit, then commit. |
-| `/write-pr` | Generate PR description from Jira tickets and open GitHub PR. |
-| `/pr-review` | Address GitHub PR review comments, fix code, commit, then reply to reviewers. |
-| `/jenkins-build` | Trigger Jenkins CI build, monitor result, fix failures. Requires Jenkins MCP. |
+| Skill | Description | 何時觸發 |
+|---|---|---|
+| `/new-feature` | Full flow from requirement to commit — brainstorm, plan, implement, review, commit. No Jira required. | 「我要做一個新功能」、任何新功能 / bug fix / 重構任務 |
+| `/new-jira-ticket` | Full flow from requirement to Jira ticket — brainstorm, create ticket, optionally kick off implementation. Requires Jira env vars. | 「幫我開一個 Jira ticket」 |
+| `/jira-ticket` | Read Jira ticket, implement via OpenSpec, then commit. Requires Jira env vars and OpenSpec. | 「幫我做 PROJ-1234」（提供 ticket 編號）|
+| `/pre-commit-review` | Review staged changes, auto-fix issues, run tests, mentor-check, then commit. | 「幫我 commit」、「review 一下準備 commit」 |
+| `/write-pr` | Generate PR description from Jira tickets and open GitHub PR. | 「幫我開 PR」、「寫 PR description」 |
+| `/pr-review` | Address GitHub PR review comments, fix code, commit, then reply to reviewers. | 「PR #123 有 review comments 要處理」 |
+| `/jenkins-build` | Trigger Jenkins CI build, monitor result, fix failures. Requires Jenkins MCP. | 「build develop alpha」 |
+| `/new-release-note` | Generate release notes from Jira fixVersion, create git tag, and publish GitHub release. | 「幫我做 release note」、「我想要建立 release note」 |
 
 **Quality gate**
 
-| Skill | Description |
-|---|---|
-| `/quality-gate` | Mentor check — verifies plans and commits at key checkpoints; supports both Jira and no-Jira modes |
+| Skill | Description | 何時觸發 |
+|---|---|---|
+| `/quality-gate` | Mentor check — verifies plans and commits at key checkpoints; supports both Jira and no-Jira modes | 自動在 skill 執行關鍵節點觸發 |
 
 **Reflection**
 
-| Skill | Description |
-|---|---|
-| `/reflect` | Record an issue or lesson into session memory |
-| `/retrospective` | Review session issues and propose skill/agent updates |
+| Skill | Description | 何時觸發 |
+|---|---|---|
+| `/reflect` | Record an issue or lesson into session memory | 「檢討一下」、「記錄一下」、「這個要記起來」 |
+| `/retrospective` | Review session issues and propose skill/agent updates | 「總結檢討」、「看一下問題」、「有什麼要改的」 |
 
-### Jenkins MCP Venv
 
-`sync-skills.sh` creates `personal-skills/tools/jenkins-monitor/.venv` — an isolated Python environment for the Jenkins MCP server's dependencies. Claude Code's MCP config points at the Python binary inside this venv so the server can run without touching system Python.
