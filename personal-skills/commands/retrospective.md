@@ -34,12 +34,21 @@ python3 ~/.claude/tools/mentor_memory.py read-issues
 
 ## Step 3 — 提案
 
+**提案前，先確認每個 skill/agent 的真實來源位置：**
+
+```bash
+find ~/agency-agents -name "<skill-or-agent>.md" 2>/dev/null
+```
+
+- 若在 `~/agency-agents/` 下 → 來源是 agency-agents，後續編輯該處
+- 若找不到 → 來源是 `~/.claude/commands/` 或 `~/.claude/agents/`，直接編輯
+
 列出所有「值得更新」的項目，格式：
 
 ```
 ## 建議更新
 
-1. **[skill/agent/CLAUDE.md]** `<檔案名稱>`
+1. **[skill/agent/CLAUDE.md]** `<agency-agents 或 .claude 的真實路徑>`
    問題：<發生了什麼>
    建議改法：<具體要加什麼或改什麼>
 
@@ -54,8 +63,11 @@ python3 ~/.claude/tools/mentor_memory.py read-issues
 
 等使用者確認後，逐項執行：
 
-- **Skill 更新** → 直接編輯 `~/.claude/commands/<skill>.md`
-- **Agent 更新** → 編輯 `~/agency-agents/engineering/<agent>.md`，完成後執行：
+- **Skill 更新** → 編輯 `~/agency-agents/personal-skills/commands/<skill>.md`，完成後執行：
+  ```bash
+  cd ~/agency-agents && ./scripts/sync-skills.sh --to claude --replace
+  ```
+- **Agent 更新** → 編輯 `~/agency-agents/engineering/<agent>.md` 或對應 category，完成後執行：
   ```bash
   cd ~/agency-agents && ./scripts/install.sh --tool claude-code
   ```

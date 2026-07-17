@@ -80,14 +80,20 @@ Always respond to the user in **Traditional Chinese (繁體中文)**.
 
 ## Agent File Editing Rules
 
-Agent files in `~/.claude/agents/` are managed by the `~/agency-agents` repository.
+Agent files and skills are both managed by the `~/agency-agents` repository.
 
 - **Never edit `~/.claude/agents/*.md` directly** — changes will be overwritten on the next install.
-- Edit the source files in `~/agency-agents/<category>/` instead (e.g. `engineering/`, `specialized/`).
-- Skills in `~/.claude/commands/` are **not** managed by agency-agents — edit them directly.
-- After editing, sync to Claude Code by running:
+- **Never edit `~/.claude/commands/*.md` directly** — changes will be overwritten on the next sync.
+- Edit source files in the appropriate location:
+  - Agents → `~/agency-agents/<category>/` (e.g. `engineering/`, `specialized/`)
+  - Skills → `~/agency-agents/personal-skills/commands/`
+- After editing **agents**, sync with:
   ```bash
   cd ~/agency-agents && ./scripts/install.sh --tool claude-code
+  ```
+- After editing **skills** (or tools/config), sync with:
+  ```bash
+  cd ~/agency-agents && ./scripts/sync-skills.sh --to claude --replace
   ```
 - **Do NOT commit or push** unless the user explicitly asks.
 - When asked to commit/push, use:

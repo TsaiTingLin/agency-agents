@@ -5,6 +5,8 @@ description: Full Jenkins build workflow — confirm job, update parameters, tri
 
 # Jenkins Build Workflow
 
+> **Prerequisites:** The target Jenkins job must have `BranchName` (String) and `ProductFlavor` (Choice: Alpha/Beta) parameters, and must support `buildWithParameters`. These names are hardcoded to this org's convention — see README for details if adapting to a different setup.
+
 Follow these steps in order every time the user requests a Jenkins build.
 
 ## Step 1 — Identify Job
@@ -18,13 +20,15 @@ Map the branch name to the target job name:
 
 ### Step 1a — Confirm Job
 
-Present choices to the user, marking the target job as recommended:
+Present choices to the user, marking the target job as recommended.
+
+**IMPORTANT: List ALL jobs from the list that match the prefix — do NOT filter, omit, or summarize any of them.**
 
 > 請選擇要使用的 job：
 > 1. `{{JENKINS_JOB_PREFIX}}-<target>` ← 建議（若存在）
 > 2. `{{JENKINS_JOB_PREFIX}}-Foo`
 > 3. `{{JENKINS_JOB_PREFIX}}-Bar`
-> …（列出所有符合 prefix 的 jobs）
+> …（每一個符合 prefix 的 job 都必須列出，一個都不能省略）
 
 **Do NOT proceed until the user selects.**
 

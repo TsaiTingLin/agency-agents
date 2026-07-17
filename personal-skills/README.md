@@ -154,6 +154,17 @@ You don't need to type the slash command directly — just describe what you wan
 | `/write-pr` | Generate PR description from Jira tickets and open GitHub PR. | 「幫我開 PR」、「寫 PR description」 |
 | `/pr-review` | Address GitHub PR review comments, fix code, commit, then reply to reviewers. | 「PR #123 有 review comments 要處理」 |
 | `/jenkins-build` | Trigger Jenkins CI build, monitor result, fix failures. Requires Jenkins MCP. | 「build develop alpha」 |
+
+**`/jenkins-build` — Jenkins job 前提條件**
+
+The skill assumes the target job has these parameters (names are hardcoded):
+
+| Parameter | Type | Description |
+|---|---|---|
+| `BranchName` | String | Branch to build |
+| `ProductFlavor` | Choice | Must include `Alpha` and `Beta` as options |
+
+The job must support `buildWithParameters` (i.e. "This project is parameterized" in Jenkins UI). Job naming convention (strip `develop-root-`/`develop-`/`feature/`, then Title-case) and success detection (build artifact path + upload step) are also org-specific. Adapt `commands/jenkins-build.md` and `tools/jenkins-monitor/jenkins_client.py` if your setup differs.
 | `/new-release-note` | Generate release notes from Jira fixVersion, create git tag, and publish GitHub release. | 「幫我做 release note」、「我想要建立 release note」 |
 
 **Quality gate**
