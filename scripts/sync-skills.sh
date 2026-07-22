@@ -572,8 +572,8 @@ sync_commands() {
         printf '   export JENKINS_URL="https://your-jenkins.com"\n'
         printf '   export JENKINS_USER="your-username"\n'
         printf '   export JENKINS_TOKEN="your-token"\n\n'
-        printf '   # Claude Code session cleanup\n'
-        printf "   trap '[[ -n \"\$TERM_SESSION_ID\" ]] && rm -rf \"\$HOME/.claude/review/\$TERM_SESSION_ID\" 2>/dev/null' EXIT\n"
+        printf '   # Claude Code / Codex CLI session cleanup\n'
+        printf "   trap '[[ -n \"\$TERM_SESSION_ID\" ]] && rm -rf \"\$HOME/.claude/review/\$TERM_SESSION_ID\" \"\$HOME/.codex/review/\$TERM_SESSION_ID\" 2>/dev/null' EXIT\n"
         printf '%s\n\n' "$(printf '%0.s─' {1..60})"
       else
         printf '  dry-run zshrc-reminder (would print manual setup instructions)\n'

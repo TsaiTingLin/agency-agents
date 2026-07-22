@@ -28,19 +28,28 @@ def substitute(text, home, python_bin):
     return text
 
 
+def _cmd_signature(command):
+    """Command identity ignoring which python interpreter path runs it, so
+    re-running merge with a different resolved python3 path (e.g. plain
+    'python3' vs '/opt/homebrew/bin/python3') is recognized as the same hook
+    instead of being appended as a duplicate."""
+    parts = command.split(None, 1)
+    return parts[1] if len(parts) > 1 else command
+
+
 def merge_hooks(target_hooks, template_hooks):
     """Add hook commands from template that are not already in target."""
     for event, template_entries in template_hooks.items():
         if event not in target_hooks:
             target_hooks[event] = template_entries
             continue
-        existing_cmds = set()
+        existing_sigs = set()
         for entry in target_hooks[event]:
             for hook in entry.get("hooks", []):
-                existing_cmds.add(hook.get("command", ""))
+                existing_sigs.add(_cmd_signature(hook.get("command", "")))
         for entry in template_entries:
             for hook in entry.get("hooks", []):
-                if hook.get("command", "") not in existing_cmds:
+                if _cmd_signature(hook.get("command", "")) not in existing_sigs:
                     target_hooks[event].append(entry)
     return target_hooks
 

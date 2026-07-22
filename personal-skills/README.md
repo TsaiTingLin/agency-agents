@@ -62,8 +62,9 @@ The dry-run output has three sections:
 Add the following to `~/.zshrc`:
 
 ```bash
-# Claude Code session cleanup
-trap '[[ -n "$TERM_SESSION_ID" ]] && rm -rf "$HOME/.claude/review/$TERM_SESSION_ID" 2>/dev/null' EXIT
+# Claude Code / Codex CLI session cleanup (both tools share the same
+# TERM_SESSION_ID within one terminal tab, so one trap covers both)
+trap '[[ -n "$TERM_SESSION_ID" ]] && rm -rf "$HOME/.claude/review/$TERM_SESSION_ID" "$HOME/.codex/review/$TERM_SESSION_ID" 2>/dev/null' EXIT
 
 # Jenkins MCP credentials (only needed for /jenkins-build)
 export JENKINS_URL="https://your-jenkins.com"

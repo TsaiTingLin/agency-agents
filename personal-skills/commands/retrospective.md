@@ -61,18 +61,26 @@ find ~/agency-agents -name "<skill-or-agent>.md" 2>/dev/null
 
 ## Step 4 — 執行更新
 
+先判斷目前是在哪個工具上執行這個 skill(看目前的 session 是 Claude Code 還是 Codex），再套用對應分支。**不要不分工具就假設是 Claude。**
+
 等使用者確認後，逐項執行：
 
 - **Skill 更新** → 編輯 `~/agency-agents/personal-skills/commands/<skill>.md`，完成後執行：
   ```bash
+  # Claude Code：
   cd ~/agency-agents && ./scripts/sync-skills.sh --to claude --replace
+  # Codex：
+  cd ~/agency-agents && ./scripts/sync-skills.sh --to codex --replace
   ```
 - **Agent 更新** → 編輯 `~/agency-agents/engineering/<agent>.md` 或對應 category，完成後執行：
   ```bash
+  # Claude Code：
   cd ~/agency-agents && ./scripts/install.sh --tool claude-code
+  # Codex：
+  cd ~/agency-agents && ./scripts/convert.sh --tool codex && ./scripts/install.sh --tool codex
   ```
-- **CLAUDE.md 更新** → 直接編輯 `~/.claude/CLAUDE.md`
-- **settings.json 更新** → 直接編輯 `~/.claude/settings.json`
+- **CLAUDE.md 更新**（僅 Claude Code）→ 直接編輯 `~/.claude/CLAUDE.md`
+- **settings.json 更新**（僅 Claude Code——Codex 沒有對應的 hooks/settings 機制）→ 直接編輯 `~/.claude/settings.json`
 
 每項更新完成後告知使用者。
 

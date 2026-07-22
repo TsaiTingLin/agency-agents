@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """mentor_retrospective — Stop hook.
 
-Fires when the Claude Code session ends.
-Reminds user to run mentor-check-commit for retrospective if a session is active.
+Fires whenever the Claude Code agent loop stops (i.e. on most turns, not just
+session end). Reminds user to run mentor-check-commit only when there are
+actually recorded issues to retrospect on, so the reminder doesn't repeat on
+every turn of a session that never called /reflect.
 Cleanup is handled by the .zshrc EXIT trap — this hook no longer calls cleanup_session().
 """
 
@@ -10,13 +12,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from mentor_memory import get_session_dir
+from mentor_memory import read_issues
 
 
 def main() -> int:
-    session_dir = get_session_dir()
-
-    if session_dir:
+    if read_issues().strip():
         print("\n" + "═" * 60)
         print("  Quality Gate Session 結束")
         print("═" * 60)

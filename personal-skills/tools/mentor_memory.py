@@ -8,7 +8,13 @@ Session ID priority: TERM_SESSION_ID (macOS Terminal) → ITERM_SESSION_ID (iTer
 TERM_SESSION_ID is used as primary because it's available in both hook env and terminal shell (EXIT trap).
 
 On terminal close, the .zshrc EXIT trap deletes the directory directly.
-On init, directories older than 24 hours are also cleaned up (handles crashes).
+On init, directories older than 30 days are also cleaned up (handles crashes).
+
+Every write path (write_requirements, log_issue) falls back to init_session()
+when no session dir exists yet, so correctness never depends on a hook having
+run first. SessionStart/Stop hooks (Claude Code only — Codex has no equivalent
+wired up) are a pure UX layer on top: earlier cleanup timing and an end-of-turn
+reminder. Removing them would not break recording or the mentor review flow.
 
 CLI usage:
   python3 mentor_memory.py init                             — initialise session dir, clean old dirs
@@ -60,11 +66,11 @@ def init_session() -> Path:
 
 
 def _cleanup_old_sessions() -> None:
-    """Delete session dirs older than 24 hours (handles crashes / missed EXIT traps)."""
+    """Delete session dirs older than 30 days (handles crashes / missed EXIT traps)."""
     base = _review_base()
     if not base.exists():
         return
-    cutoff = datetime.now() - timedelta(hours=24)
+    cutoff = datetime.now() - timedelta(days=30)
     current_sid = _term_session_id()
     for d in base.iterdir():
         if not d.is_dir():
