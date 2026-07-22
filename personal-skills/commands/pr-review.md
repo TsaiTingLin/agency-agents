@@ -142,6 +142,8 @@ Use 🔴 / 🟡 / 💭 priority markers.
 
 Check whether there is an existing spec file for this change in `openspec/changes/`. If one exists, update it to reflect the fixes.
 
+**Pivot 同步原則：** 更新 `tasks.md`、`spec.md`、`design.md` 時，只描述完成後的最終狀態（signature、行為、結果），不描述改動過程（例如「移除 X、改為 Y」）。
+
 ---
 
 ### Step 6.5 — Present disposition table and confirm before committing
