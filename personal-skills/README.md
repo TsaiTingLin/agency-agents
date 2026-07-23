@@ -157,6 +157,12 @@ You don't need to type the slash command directly — just describe what you wan
 | `/jenkins-build` | Trigger Jenkins CI build, monitor result, fix failures. Requires Jenkins MCP. Job must have `BranchName` (String) and `ProductFlavor` (Choice: Alpha/Beta) params; job naming convention and success detection are org-specific — adapt `commands/jenkins-build.md` if your setup differs. | 「build develop alpha」 |
 | `/new-release-note` | Generate release notes from Jira fixVersion, create git tag, and publish GitHub release. | 「幫我做 release note」、「我想要建立 release note」 |
 
+**Personal productivity**
+
+| Skill | Description | 何時觸發 |
+|---|---|---|
+| `/setup-gmail-slack-digest` | Categorize unread Gmail and send a digest to your Slack self-DM. **Codex:** the skill checks the Gmail and Slack plugins; when prompted, manually approve and connect them before it creates the Codex automation. **Claude Code:** the skill runs the Slack plugin install command and guides setup of the `workspace-gmail` MCP (`google_workspace_mcp`). | 「幫我設定 Gmail 未讀整理」、「把 Gmail 未讀信整理到 Slack」 |
+
 **Quality gate**
 
 | Skill | Description | 何時觸發 |
@@ -169,5 +175,3 @@ You don't need to type the slash command directly — just describe what you wan
 |---|---|---|
 | `/reflect` | Record an issue or lesson into session memory | 「檢討一下」、「記錄一下」、「這個要記起來」 |
 | `/retrospective` | Review session issues and propose skill/agent updates | 「總結檢討」、「看一下問題」、「有什麼要改的」 |
-
-
